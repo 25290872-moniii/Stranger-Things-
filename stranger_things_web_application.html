@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="es" class="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stranger Things | Hawkins & El Mundo del Revés</title>
+    
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        st: {
+                            red: '#FF0033',
+                            redGlow: '#FF3355',
+                            dark: '#0A0A0E',
+                            abyss: '#030509',
+                            neonBlue: '#00F0FF',
+                            neonPink: '#FF007F',
+                            labYellow: '#FFCC00'
+                        }
+                    },
+                    fontFamily: {
+                        serif: ['Benguiat', 'Georgia', 'serif'],
+                        sans: ['Inter', 'sans-serif'],
+                        mono: ['Courier New', 'monospace']
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Inter:wght@300;400;600;700&family=Press+Start+2P&display=swap" rel="stylesheet">
+
+    <style>
+        /* Retro Synth & Stranger Things Specific CSS */
+        @import url('https://fonts.googleapis.com/css2?family=ITC+Benguiat:wght@700&display=swap');
+
+        body {
+            background-color: #0A0A0E;
+            color: #E2E8F0;
+            font-family: 'Inter', sans-serif;
+            overflow-x: hidden;
+            transition: background-color 0.8s ease, color 0.8s ease;
+        }
+
+        /* Stranger Things Glowing Title Font */
+        .st-title {
+            font-family: 'Cinzel Decorative', 'Georgia', serif;
+            text-shadow: 0 0 10px #ff0033, 0 0 20px #ff0033, 0 0 40px #ff0033, 0 0 80px #880000;
+            letter-spacing: -1px;
+        }
+
+        /* Flicker Animations */
+        @keyframes flicker {
+            0%, 100% { opacity: 1; }
+            41.99% { opacity: 1; }
+            42% { opacity: 0.3; }
+            43% { opacity: 0.8; }
+            45% { opacity: 0.2; }
+            46% { opacity: 1; }
+            83% { opacity: 0.9; }
+            84% { opacity: 0.4; }
+            85% { opacity: 1; }
+        }
+
+        .animate-flicker {
+            animation: flicker 4s infinite;
+        }
+
+        /* Upside Down Theme Overlay Effects */
+        .upside-down-mode {
+            background-color: #030509 !important;
+            filter: contrast(1.15) saturate(0.85);
+        }
+
+        .upside-down-mode .st-title {
+            text-shadow: 0 0 10px #00F0FF, 0 0 20px #00F0FF, 0 0 40px #005588;
+            color: #E0FCFF !important;
+        }
+
+        /* Scanline Overlay Effect */
+        .crt-scanlines::before {
+            content: " ";
+            display: block;
+            position: fixed;
+            top: 0; left: 0; bottom: 0; right: 0;
+            background: linear-gradient(rgba(18, 16, 16, 0) 50%, rgba(0, 0, 0, 0.25) 50%);
+            background-size: 100% 4px;
+            z-index: 40;
+            pointer-events: none;
+            opacity: 0.4;
+        }
+
+        /* Spore Particle Canvas */
+        #sporeCanvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            pointer-events: none;
+            z-index: 10;
+        }
+
+        /* Christmas Lights Glow */
+        .light-bulb {
+            transition: all 0.2s ease-in-out;
+            opacity: 0.3;
+            transform: scale(0.95);
+        }
+
+        .light-bulb.active {
+            opacity: 1;
+            transform: scale(1.25);
+        }
+
+        .light-bulb.active.red {
+            box-shadow: 0 0 20px 8px #FF0033;
+            background-color: #FF0033 !important;
+        }
+        .light-bulb.active.blue {
+            box-shadow: 0 0 20px 8px #00F0FF;
+            background-color: #00F0FF !important;
+        }
+        .light-bulb.active.yellow {
+            box-shadow: 0 0 20px 8px #FFCC00;
+            background-color: #FFCC00 !important;
+        }
+        .light-bulb.active.green {
+            box-shadow: 0 0 20px 8px #00FF66;
+            background-color: #00FF66 !important;
+        }
+        .light-bulb.active.pink {
+            box-shadow: 0 0 20px 8px #FF007F;
+            background-color: #FF007F !important;
+        }
+
+        /* Cassette Tape Reel Animation */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .spinning {
+            animation: spin 2s linear infinite;
+        }
+
+        /* Custom Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+        ::-webkit-scrollbar-track {
+            background: #0A0A0E;
+        }
+        ::-webkit-scrollbar-thumb {
+            background: #FF0033;
+            border-radius: 4px;
+        }
+        .upside-down-mode ::-webkit-scrollbar-thumb {
+            background: #00F0FF;
+        }
+    </style>
+</head>
+<body class="crt-scanlines relative">
+
+    <!-- SPORE PARTICLES CANVAS -->
+    <canvas id="sporeCanvas"></canvas>
+
+    <!-- NAVIGATION BAR -->
+    <nav class="fixed top-0 left-0 w-full z-50 bg-black/80 backdrop-blur-md border-b border-red-900/40 transition-colors duration-500" id="mainNav">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex items-center justify-between h-20">
+                
+                <!-- Logo -->
+                <a href="#" class="flex items-center gap-2 group">
+                    <span class="st-title text-2xl font-bold text-st-red group-hover:scale-105 transition-transform">
+                        STRANGER THINGS
+                    </span>
+                </a>
+
+                <!-- Desktop Menu -->
+                <div class="hidden md:flex items-center space-x-6 font-medium text-sm">
+                    <a href="#personajes" class="hover:text-st-red transition-colors">Personajes</a>
+                    <a href="#criaturas" class="hover:text-st-red transition-colors">Criaturas</a>
+                    <a href="#pared" class="hover:text-st-red transition-colors">Luces de Navidad</a>
+                    <a href="#cassette" class="hover:text-st-red transition-colors">Cassette Synth</a>
+                    <a href="#test" class="hover:text-st-red transition-colors">Test Quiz</a>
+                </div>
+
+                <!-- Dimension Toggle Button -->
+                <div class="flex items-center gap-4">
+                    <button id="dimensionToggleBtn" class="bg-red-950/80 hover:bg-red-900 text-st-red border border-st-red px-4 py-2 rounded-full font-mono text-xs font-bold shadow-lg shadow-red-900/30 flex items-center gap-2 transition-all hover:scale-105 active:scale-95">
+                        <i class="fa-solid fa-portal text-sm animate-spin"></i>
+                        <span id="dimensionLabel">Mundo Real (1983)</span>
+                    </button>
+                    
+                    <button id="mobileMenuBtn" class="md:hidden text-gray-300 focus:outline-none p-2">
+                        <i class="fa-solid fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Mobile Menu -->
+        <div id="mobileMenu" class="hidden md:hidden bg-black/95 border-b border-red-900/50 px-4 pt-2 pb-6 space-y-3 font-mono text-sm">
+            <a href="#personajes" class="mobile-link block text-gray-300 hover:text-st-red py-1">Personajes</a>
+            <a href="#criaturas" class="mobile-link block text-gray-300 hover:text-st-red py-1">Criaturas</a>
+            <a href="#pared" class="mobile-link block text-gray-300 hover:text-st-red py-1">Luces de Navidad</a>
+            <a href="#cassette" class="mobile-link block text-gray-300 hover:text-st-red py-1">Cassette Synth</a>
+            <a href="#test" class="mobile-link block text-gray-300 hover:text-st-red py-1">Test Quiz</a>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section class="min-h-screen pt-32 pb-20 flex items-center justify-center relative overflow-hidden bg-gradient-to-b from-black via-st-dark to-black">
+        <div class="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-red-900/20 via-black/80 to-black pointer-events-none"></div>
+
+        <div class="max-w-5xl mx-auto px-4 text-center relative z-20 space-y-8">
+            <div class="inline-block border border-st-red/50 bg-red-950/30 backdrop-blur-sm px-4 py-1.5 rounded-full text-st-red font-mono text-xs tracking-widest uppercase mb-4 animate-pulse">
+                🔴 Estación de Monitoreo de Hawkins, Indiana
+            </div>
+
+            <h1 class="st-title text-5xl sm:text-7xl lg:text-8xl font-black text-st-red uppercase tracking-tight leading-none animate-flicker">
+                STRANGER<br>THINGS
+            </h1>
+
+            <p class="text-gray-400 text-lg sm:text-xl max-w-2xl mx-auto font-light leading-relaxed">
+                Bienvenido a Hawkins. Entre experimentos secretos en el Laboratorio Nacional y portales interdimensionales, el peligro acecha bajo la superficie.
+            </p>
+
+            <div class="flex flex-wrap items-center justify-center gap-4 pt-4">
+                <a href="#pared" class="bg-st-red hover:bg-red-700 text-white font-mono font-bold px-8 py-4 rounded-lg shadow-lg shadow-red-900/50 transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-lightbulb"></i> Enviar Mensaje con Luces
+                </a>
+                <a href="#cassette" class="bg-gray-900 hover:bg-gray-800 text-st-neonBlue border border-st-neonBlue/40 font-mono font-bold px-8 py-4 rounded-lg shadow-lg transition-all hover:scale-105 active:scale-95 flex items-center gap-2">
+                    <i class="fa-solid fa-tape"></i> Encender Cassette Synth
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 1: PERSONAJES -->
+    <section id="personajes" class="py-24 border-t border-red-900/20 bg-black/60 relative">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-st-red font-mono text-xs uppercase tracking-widest bg-red-950/40 px-3 py-1 rounded border border-red-900/40">Expedientes de Hawkins</span>
+                <h2 class="st-title text-3xl sm:text-5xl font-bold text-st-red mt-3">Personajes Principales</h2>
+                <p class="text-gray-400 mt-3 text-sm sm:text-base">Explora a los héroes que luchan contra las fuerzas oscuras del Upside Down.</p>
+                
+                <!-- Category Filters -->
+                <div class="flex flex-wrap justify-center gap-2 mt-8 font-mono text-xs" id="charFilters">
+                    <button data-filter="all" class="char-filter-btn active bg-st-red text-white px-4 py-2 rounded-md transition-all">Todos</button>
+                    <button data-filter="kids" class="char-filter-btn bg-gray-900 text-gray-400 hover:text-white border border-gray-800 px-4 py-2 rounded-md transition-all">El Club de D&D</button>
+                    <button data-filter="teens" class="char-filter-btn bg-gray-900 text-gray-400 hover:text-white border border-gray-800 px-4 py-2 rounded-md transition-all">Adolescentes</button>
+                    <button data-filter="adults" class="char-filter-btn bg-gray-900 text-gray-400 hover:text-white border border-gray-800 px-4 py-2 rounded-md transition-all">Adultos</button>
+                </div>
+            </div>
+
+            <!-- Character Grid -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8" id="characterGrid">
+                <!-- Character cards rendered dynamically via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: CRIATURAS DEL UPSIDE DOWN -->
+    <section id="criaturas" class="py-24 bg-st-abyss relative border-t border-red-900/30">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-3xl mx-auto mb-16">
+                <span class="text-st-neonBlue font-mono text-xs uppercase tracking-widest bg-blue-950/40 px-3 py-1 rounded border border-blue-900/40">Bestiario de Sombras</span>
+                <h2 class="st-title text-3xl sm:text-5xl font-bold text-st-red mt-3">Amenazas de la Sombra</h2>
+                <p class="text-gray-400 mt-3 text-sm sm:text-base">Entidades hostiles provenientes de la dimensión paralela.</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+                <!-- Vecna Card -->
+                <div class="bg-gray-950 border border-red-900/50 rounded-2xl p-6 sm:p-8 relative overflow-hidden group hover:border-st-red transition-all shadow-xl">
+                    <div class="flex flex-col sm:flex-row gap-6 items-center">
+                        <img src="https://images.unsplash.com/photo-1509198397868-475647b2a1e5?auto=format&fit=crop&w=400&q=80" alt="Vecna" class="w-32 h-32 object-cover rounded-xl border border-red-800 shadow-md group-hover:scale-105 transition-transform" onerror="this.src='https://placehold.co/400x400/111115/FF0033?text=VECNA'">
+                        <div class="space-y-3 text-center sm:text-left">
+                            <div class="flex items-center justify-center sm:justify-start gap-2">
+                                <span class="bg-red-950 text-st-red text-xs font-mono px-2.5 py-1 rounded font-bold border border-st-red/40">NIVEL DE AMENAZA: EXTREMO</span>
+                            </div>
+                            <h3 class="font-serif text-3xl font-bold text-white">Vecna (Henry Creel / 001)</h3>
+                            <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                                El gobernante supremo del Mundo del Revés. Ataca a sus víctimas a través de sus traumas del pasado mediante pesadillas e ilusiones psicológicas.
+                            </p>
+                            <div class="font-mono text-xs text-st-neonBlue pt-2 flex flex-wrap justify-center sm:justify-start gap-4">
+                                <span><i class="fa-solid fa-skull text-st-red mr-1"></i> Origen: Lab 001</span>
+                                <span><i class="fa-solid fa-bolt text-yellow-500 mr-1"></i> Telequinesis & Ilusiones</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Mind Flayer Card -->
+                <div class="bg-gray-950 border border-red-900/50 rounded-2xl p-6 sm:p-8 relative overflow-hidden group hover:border-st-red transition-all shadow-xl">
+                    <div class="flex flex-col sm:flex-row gap-6 items-center">
+                        <img src="https://images.unsplash.com/photo-1518709268805-4e9042af9f23?auto=format&fit=crop&w=400&q=80" alt="Mind Flayer" class="w-32 h-32 object-cover rounded-xl border border-red-800 shadow-md group-hover:scale-105 transition-transform" onerror="this.src='https://placehold.co/400x400/111115/FF0033?text=MIND+FLAYER'">
+                        <div class="space-y-3 text-center sm:text-left">
+                            <div class="flex items-center justify-center sm:justify-start gap-2">
+                                <span class="bg-red-950 text-st-red text-xs font-mono px-2.5 py-1 rounded font-bold border border-st-red/40">NIVEL DE AMENAZA: COLOSAL</span>
+                            </div>
+                            <h3 class="font-serif text-3xl font-bold text-white">El Azotamentes (Mind Flayer)</h3>
+                            <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                                Una entidad gigantesca con forma de araña compuesta de polvo y sombras. Controla a todas las criaturas del Upside Down mediante una mente en colmena.
+                            </p>
+                            <div class="font-mono text-xs text-st-neonBlue pt-2 flex flex-wrap justify-center sm:justify-start gap-4">
+                                <span><i class="fa-solid fa-network-wired text-st-red mr-1"></i> Mente Colectiva</span>
+                                <span><i class="fa-solid fa-mask text-purple-400 mr-1"></i> Posesión de Huéspedes</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demogorgon Card -->
+                <div class="bg-gray-950 border border-red-900/50 rounded-2xl p-6 sm:p-8 relative overflow-hidden group hover:border-st-red transition-all shadow-xl">
+                    <div class="flex flex-col sm:flex-row gap-6 items-center">
+                        <img src="https://images.unsplash.com/photo-1509248961158-e54f6934749c?auto=format&fit=crop&w=400&q=80" alt="Demogorgon" class="w-32 h-32 object-cover rounded-xl border border-red-800 shadow-md group-hover:scale-105 transition-transform" onerror="this.src='https://placehold.co/400x400/111115/FF0033?text=DEMOGORGON'">
+                        <div class="space-y-3 text-center sm:text-left">
+                            <div class="flex items-center justify-center sm:justify-start gap-2">
+                                <span class="bg-yellow-950 text-yellow-500 text-xs font-mono px-2.5 py-1 rounded font-bold border border-yellow-800/40">NIVEL DE AMENAZA: ALTO</span>
+                            </div>
+                            <h3 class="font-serif text-3xl font-bold text-white">Demogorgon</h3>
+                            <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                                Depredador humanoide con una cara en forma de flor llena de dientes afilados. Atraído por el olor a sangre fresca a través de brechas interdimensionales.
+                            </p>
+                            <div class="font-mono text-xs text-st-neonBlue pt-2 flex flex-wrap justify-center sm:justify-start gap-4">
+                                <span><i class="fa-solid fa-droplet text-st-red mr-1"></i> Rastreo de Sangre</span>
+                                <span><i class="fa-solid fa-door-open text-green-400 mr-1"></i> Viaje Dimensional</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Demodogs Card -->
+                <div class="bg-gray-950 border border-red-900/50 rounded-2xl p-6 sm:p-8 relative overflow-hidden group hover:border-st-red transition-all shadow-xl">
+                    <div class="flex flex-col sm:flex-row gap-6 items-center">
+                        <img src="https://images.unsplash.com/photo-1543466835-00a7907e9de1?auto=format&fit=crop&w=400&q=80" alt="Demodogs" class="w-32 h-32 object-cover rounded-xl border border-red-800 shadow-md group-hover:scale-105 transition-transform" onerror="this.src='https://placehold.co/400x400/111115/FF0033?text=DEMODOGS'">
+                        <div class="space-y-3 text-center sm:text-left">
+                            <div class="flex items-center justify-center sm:justify-start gap-2">
+                                <span class="bg-yellow-950 text-yellow-500 text-xs font-mono px-2.5 py-1 rounded font-bold border border-yellow-800/40">NIVEL DE AMENAZA: MODERADO (EN MANADA)</span>
+                            </div>
+                            <h3 class="font-serif text-3xl font-bold text-white">Demoperros (Demodogs)</h3>
+                            <p class="text-gray-400 text-xs sm:text-sm leading-relaxed">
+                                Etapa cuadrúpeda e inmadura del Demogorgon (como D'Artagnan). Cazan en manada y acatan las órdenes directas del Azotamentes.
+                            </p>
+                            <div class="font-mono text-xs text-st-neonBlue pt-2 flex flex-wrap justify-center sm:justify-start gap-4">
+                                <span><i class="fa-solid fa-dog text-st-red mr-1"></i> Ataque en Jauría</span>
+                                <span><i class="fa-solid fa-shield text-yellow-400 mr-1"></i> Piel Blindada</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 3: LA PARAD DE LUCES DE NAVIDAD (JOYCE BYERS WALL) -->
+    <section id="pared" class="py-24 bg-black relative border-t border-red-900/40">
+        <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-yellow-400 font-mono text-xs uppercase tracking-widest bg-yellow-950/40 px-3 py-1 rounded border border-yellow-700/40">Comunicador Interdimensional</span>
+                <h2 class="st-title text-3xl sm:text-5xl font-bold text-st-red mt-3">La Pared de Luces de Joyce</h2>
+                <p class="text-gray-400 mt-2 text-sm">Escribe tu mensaje en la terminal de abajo y observa cómo Will Byers intenta comunicarse desde el Mundo del Revés iluminando las luces letra por letra.</p>
+            </div>
+
+            <!-- Wall Container -->
+            <div class="bg-[radial-gradient(ellipse_at_top,_var(--tw-gradient-stops))] from-yellow-950/20 via-gray-950 to-black p-6 sm:p-10 rounded-3xl border-2 border-amber-950/50 shadow-2xl relative overflow-hidden">
+                
+                <!-- Alphabet Light Grid -->
+                <div class="space-y-8 my-4" id="alphabetGrid">
+                    <!-- Row 1: A-H -->
+                    <div class="flex justify-center flex-wrap gap-4 sm:gap-6">
+                        <div data-letter="A" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-red-600 mb-2 border border-black" data-color="red"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">A</span>
+                        </div>
+                        <div data-letter="B" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-blue-500 mb-2 border border-black" data-color="blue"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">B</span>
+                        </div>
+                        <div data-letter="C" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-yellow-400 mb-2 border border-black" data-color="yellow"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">C</span>
+                        </div>
+                        <div data-letter="D" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-green-500 mb-2 border border-black" data-color="green"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">D</span>
+                        </div>
+                        <div data-letter="E" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-pink-500 mb-2 border border-black" data-color="pink"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">E</span>
+                        </div>
+                        <div data-letter="F" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-red-600 mb-2 border border-black" data-color="red"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">F</span>
+                        </div>
+                        <div data-letter="G" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-blue-500 mb-2 border border-black" data-color="blue"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">G</span>
+                        </div>
+                        <div data-letter="H" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-yellow-400 mb-2 border border-black" data-color="yellow"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">H</span>
+                        </div>
+                    </div>
+
+                    <!-- Row 2: I-Q -->
+                    <div class="flex justify-center flex-wrap gap-4 sm:gap-6">
+                        <div data-letter="I" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-green-500 mb-2 border border-black" data-color="green"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">I</span>
+                        </div>
+                        <div data-letter="J" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-pink-500 mb-2 border border-black" data-color="pink"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">J</span>
+                        </div>
+                        <div data-letter="K" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-red-600 mb-2 border border-black" data-color="red"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">K</span>
+                        </div>
+                        <div data-letter="L" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-blue-500 mb-2 border border-black" data-color="blue"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">L</span>
+                        </div>
+                        <div data-letter="M" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-yellow-400 mb-2 border border-black" data-color="yellow"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">M</span>
+                        </div>
+                        <div data-letter="N" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-green-500 mb-2 border border-black" data-color="green"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">N</span>
+                        </div>
+                        <div data-letter="O" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-pink-500 mb-2 border border-black" data-color="pink"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">O</span>
+                        </div>
+                        <div data-letter="P" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-red-600 mb-2 border border-black" data-color="red"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">P</span>
+                        </div>
+                        <div data-letter="Q" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-blue-500 mb-2 border border-black" data-color="blue"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">Q</span>
+                        </div>
+                    </div>
+
+                    <!-- Row 3: R-Z -->
+                    <div class="flex justify-center flex-wrap gap-4 sm:gap-6">
+                        <div data-letter="R" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-yellow-400 mb-2 border border-black" data-color="yellow"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">R</span>
+                        </div>
+                        <div data-letter="S" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-green-500 mb-2 border border-black" data-color="green"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">S</span>
+                        </div>
+                        <div data-letter="T" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-pink-500 mb-2 border border-black" data-color="pink"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">T</span>
+                        </div>
+                        <div data-letter="U" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-red-600 mb-2 border border-black" data-color="red"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">U</span>
+                        </div>
+                        <div data-letter="V" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-blue-500 mb-2 border border-black" data-color="blue"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">V</span>
+                        </div>
+                        <div data-letter="W" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-yellow-400 mb-2 border border-black" data-color="yellow"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">W</span>
+                        </div>
+                        <div data-letter="X" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-green-500 mb-2 border border-black" data-color="green"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">X</span>
+                        </div>
+                        <div data-letter="Y" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-pink-500 mb-2 border border-black" data-color="pink"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">Y</span>
+                        </div>
+                        <div data-letter="Z" class="light-wrapper flex flex-col items-center cursor-pointer">
+                            <div class="light-bulb w-6 h-10 rounded-full bg-red-600 mb-2 border border-black" data-color="red"></div>
+                            <span class="font-serif text-2xl font-black text-amber-200 tracking-wider">Z</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Input Controls -->
+                <div class="mt-8 pt-6 border-t border-gray-800 flex flex-col sm:flex-row gap-4 items-center">
+                    <input type="text" id="wallInput" placeholder="Escribe tu mensaje aquí (ej: RUN)..." maxlength="30" class="w-full bg-gray-900 border border-st-red/40 rounded-xl px-4 py-3 font-mono text-st-red uppercase placeholder-gray-600 focus:outline-none focus:ring-2 focus:ring-st-red">
+                    <button id="sendWallMessageBtn" class="w-full sm:w-auto bg-st-red hover:bg-red-700 text-white font-mono font-bold px-6 py-3 rounded-xl shadow-lg transition-all flex items-center justify-center gap-2 whitespace-nowrap">
+                        <i class="fa-solid fa-bolt"></i> Transmitir
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: REPRODUCTOR CASSETTE SYNTH (WEB AUDIO API) -->
+    <section id="cassette" class="py-24 bg-gray-950 relative border-t border-red-900/30">
+        <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-st-neonBlue font-mono text-xs uppercase tracking-widest bg-blue-950/40 px-3 py-1 rounded border border-blue-900/40">Sintetizador Retro 1983</span>
+                <h2 class="st-title text-3xl sm:text-5xl font-bold text-st-red mt-3">Cassette Synthwave Player</h2>
+                <p class="text-gray-400 mt-2 text-sm">Escucha y genera los tonos retro de los 80 integrados por medio de nuestro reproductor de audio sintético.</p>
+            </div>
+
+            <!-- Cassette Player UI -->
+            <div class="bg-gray-900 border-2 border-gray-800 rounded-3xl p-6 sm:p-10 shadow-2xl relative">
+                
+                <!-- Cassette Window -->
+                <div class="bg-black border-4 border-gray-800 rounded-2xl p-6 mb-8 flex items-center justify-between relative overflow-hidden">
+                    <!-- Left Reel -->
+                    <div class="w-20 h-20 sm:w-28 sm:h-28 rounded-full border-4 border-white/20 flex items-center justify-center relative bg-gray-900" id="leftReel">
+                        <div class="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center">
+                            <div class="w-3 h-3 rounded-full bg-black"></div>
+                        </div>
+                    </div>
+
+                    <!-- Label -->
+                    <div class="text-center z-10 space-y-1">
+                        <span class="bg-st-red text-white font-mono text-xs px-2 py-0.5 rounded uppercase font-bold">C-90 STEREO</span>
+                        <h4 class="font-mono font-bold text-st-neonBlue text-sm sm:text-lg tracking-wider" id="currentTrackTitle">Track 01: Hawkins Theme (Synth)</h4>
+                        <p class="text-xs text-gray-500 font-mono" id="cassetteStatus">PAUSADO</p>
+                    </div>
+
+                    <!-- Right Reel -->
+                    <div class="w-20 h-20 sm:w-28 sm:h-28 rounded-full border-4 border-white/20 flex items-center justify-center relative bg-gray-900" id="rightReel">
+                        <div class="w-8 h-8 rounded-full bg-white/40 flex items-center justify-center">
+                            <div class="w-3 h-3 rounded-full bg-black"></div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Controls -->
+                <div class="flex flex-wrap items-center justify-center gap-4">
+                    <button id="playAudioBtn" class="bg-st-red hover:bg-red-700 text-white font-mono font-bold px-8 py-3 rounded-xl shadow-lg transition-all flex items-center gap-2 hover:scale-105 active:scale-95">
+                        <i class="fa-solid fa-play"></i> Reproducir Synth
+                    </button>
+                    <button id="stopAudioBtn" class="bg-gray-800 hover:bg-gray-700 text-gray-300 font-mono font-bold px-6 py-3 rounded-xl transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-stop"></i> Detener
+                    </button>
+                    <button id="nextTrackBtn" class="bg-gray-800 hover:bg-gray-700 text-st-neonBlue border border-st-neonBlue/30 font-mono font-bold px-6 py-3 rounded-xl transition-all flex items-center gap-2">
+                        <i class="fa-solid fa-forward"></i> Cambiar Pista
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: MINIJUEGO TEST DE PERSONALIDAD -->
+    <section id="test" class="py-24 bg-black relative border-t border-red-900/40">
+        <div class="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="text-center max-w-2xl mx-auto mb-12">
+                <span class="text-st-red font-mono text-xs uppercase tracking-widest bg-red-950/40 px-3 py-1 rounded border border-red-900/40">Test Interactivo</span>
+                <h2 class="st-title text-3xl sm:text-5xl font-bold text-st-red mt-3">¿Qué personaje eres?</h2>
+                <p class="text-gray-400 mt-2 text-sm">Responde a las preguntas y averigua a qué habitante de Hawkins te pareces más.</p>
+            </div>
+
+            <div class="bg-gray-950 border border-gray-800 rounded-3xl p-6 sm:p-10 shadow-2xl" id="quizWrapper">
+                <!-- Progress bar -->
+                <div class="w-full bg-gray-900 h-2 rounded-full mb-8 overflow-hidden">
+                    <div id="quizProgressBar" class="bg-st-red h-full w-1/5 transition-all duration-300"></div>
+                </div>
+
+                <!-- Dynamic Step Content -->
+                <div id="quizContent">
+                    <!-- Injected by Javascript -->
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-black text-gray-500 py-12 border-t border-red-900/30 font-mono text-xs">
+        <div class="max-w-7xl mx-auto px-4 text-center space-y-4">
+            <div class="st-title text-2xl text-st-red font-bold">HAWKINS, INDIANA • 1983</div>
+            <p>© 2026 Tributo a Stranger Things. Todos los derechos reservados.</p>
+            <p class="text-gray-600">Desarrollado con HTML5, Tailwind CSS y Web Audio API.</p>
+        </div>
+    </footer>
+
+    <!-- JAVASCRIPT LOGIC -->
+    <script>
+        // 1. CHARACTER DATA
+        const characters = [
+            {
+                name: "Eleven (Once)",
+                role: "Superhumana",
+                category: "kids",
+                image: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=400&q=80",
+                desc: "Posee habilidades telequinéticas y telepáticas extremadamente potentes nacidas de experimentos de laboratorio.",
+                quote: "«Los amigos no mienten.»"
+            },
+            {
+                name: "Mike Wheeler",
+                role: "Líder del Grupo",
+                category: "kids",
+                image: "https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=400&q=80",
+                desc: "El corazón estratégico de la pandilla y leal protector de sus amigos frente a cualquier peligro.",
+                quote: "«Si alguien pregunta dónde estoy, me he ido del país.»"
+            },
+            {
+                name: "Dustin Henderson",
+                role: "Científico y Experto",
+                category: "kids",
+                image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=400&q=80",
+                desc: "Genio intuitivo con la radio, lleno de humor y devoto de la ciencia y la tecnología.",
+                quote: "«¡Suanfonson! ¡Tengo las rodillas llenas de grasa!»"
+            },
+            {
+                name: "Steve Harrington",
+                role: "El Protector",
+                category: "teens",
+                image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=400&q=80",
+                desc: "Pasó de ser el chico popular del instituto al héroe armado con un bate con clavos que cuida de todos.",
+                quote: "«¡Soy un excelente niñero!»"
+            },
+            {
+                name: "Jim Hopper",
+                role: "Jefe de Policía",
+                category: "adults",
+                image: "https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=400&q=80",
+                desc: "Jefe de policía valiente y rudo de Hawkins con un corazón enorme y dispuesto al sacrificio.",
+                quote: "«Las mañanas son para el café y la contemplación.»"
+            },
+            {
+                name: "Max Mayfield",
+                role: "Mad Max",
+                category: "teens",
+                image: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=400&q=80",
+                desc: "Skater intrépida de carácter fuerte. Su conexión con la música salva su mente de las garras de Vecna.",
+                quote: "«Hay cosas peores que los monstruos.»"
+            }
+        ];
+
+        // RENDER CHARACTERS
+        function renderCharacters(filter = 'all') {
+            const grid = document.getElementById('characterGrid');
+            grid.innerHTML = '';
+
+            const filtered = filter === 'all' ? characters : characters.filter(c => c.category === filter);
+
+            filtered.forEach(c => {
+                const card = document.createElement('div');
+                card.className = "bg-gray-950 border border-gray-800 rounded-2xl p-6 flex flex-col justify-between hover:border-st-red transition-all shadow-xl group";
+                card.innerHTML = `
+                    <div>
+                        <div class="h-48 rounded-xl overflow-hidden mb-4 relative">
+                            <img src="${c.image}" alt="${c.name}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" onerror="this.src='https://placehold.co/400x300/111115/FF0033?text=${encodeURIComponent(c.name)}'">
+                            <span class="absolute top-3 right-3 bg-black/80 backdrop-blur-sm text-st-red font-mono text-xs px-2.5 py-1 rounded border border-st-red/30">${c.role}</span>
+                        </div>
+                        <h3 class="font-serif text-2xl font-bold text-white mb-2">${c.name}</h3>
+                        <p class="text-gray-400 text-xs leading-relaxed mb-4">${c.desc}</p>
+                    </div>
+                    <div class="pt-4 border-t border-gray-900 font-mono text-xs text-st-neonBlue italic">
+                        ${c.quote}
+                    </div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        renderCharacters();
+
+        // CHARACTER FILTERS LOGIC
+        const filterBtns = document.querySelectorAll('.char-filter-btn');
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active', 'bg-st-red', 'text-white'));
+                filterBtns.forEach(b => b.classList.add('bg-gray-900', 'text-gray-400'));
+                btn.classList.add('active', 'bg-st-red', 'text-white');
+                btn.classList.remove('bg-gray-900', 'text-gray-400');
+                renderCharacters(btn.dataset.filter);
+            });
+        });
+
+        // 2. DIMENSION TOGGLE (MUNDO REAL VS UPSIDE DOWN)
+        const dimensionBtn = document.getElementById('dimensionToggleBtn');
+        const dimensionLabel = document.getElementById('dimensionLabel');
+        let isUpsideDown = false;
+
+        dimensionBtn.addEventListener('click', () => {
+            isUpsideDown = !isUpsideDown;
+            document.body.classList.toggle('upside-down-mode', isUpsideDown);
+            
+            if (isUpsideDown) {
+                dimensionLabel.textContent = "El Mundo del Revés (Upside Down)";
+                dimensionBtn.classList.remove('border-st-red', 'text-st-red');
+                dimensionBtn.classList.add('border-st-neonBlue', 'text-st-neonBlue');
+            } else {
+                dimensionLabel.textContent = "Mundo Real (1983)";
+                dimensionBtn.classList.remove('border-st-neonBlue', 'text-st-neonBlue');
+                dimensionBtn.classList.add('border-st-red', 'text-st-red');
+            }
+        });
+
+        // 3. SPORE PARTICLES CANVAS (PARTICULAS FLOTANTES)
+        const canvas = document.getElementById('sporeCanvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class Spore {
+            constructor() {
+                this.reset();
+            }
+            reset() {
+                this.x = Math.random() * canvas.width;
+                this.y = Math.random() * canvas.height;
+                this.size = Math.random() * 2.5 + 0.5;
+                this.speedX = (Math.random() - 0.5) * 0.4;
+                this.speedY = Math.random() * 0.5 + 0.2;
+                this.opacity = Math.random() * 0.6 + 0.2;
+            }
+            update() {
+                this.x += this.speedX;
+                this.y += this.speedY;
+                if (this.y > canvas.height) this.y = 0;
+                if (this.x > canvas.width || this.x < 0) this.x = Math.random() * canvas.width;
+            }
+            draw() {
+                ctx.fillStyle = isUpsideDown ? `rgba(0, 240, 255, ${this.opacity})` : `rgba(255, 0, 51, ${this.opacity * 0.7})`;
+                ctx.beginPath();
+                ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
+                ctx.fill();
+            }
+        }
+
+        for (let i = 0; i < 75; i++) {
+            particles.push(new Spore());
+        }
+
+        function animateSpores() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateSpores);
+        }
+        animateSpores();
+
+        // 4. CHRISTMAS LIGHTS WALL LOGIC (JOYCE BYERS WALL)
+        const wallInput = document.getElementById('wallInput');
+        const sendBtn = document.getElementById('sendWallMessageBtn');
+
+        function triggerBulb(letter) {
+            const wrapper = document.querySelector(`.light-wrapper[data-letter="${letter.toUpperCase()}"]`);
+            if (!wrapper) return;
+            const bulb = wrapper.querySelector('.light-bulb');
+            const color = bulb.dataset.color;
+
+            bulb.classList.add('active', color);
+            setTimeout(() => {
+                bulb.classList.remove('active', color);
+            }, 600);
+        }
+
+        sendBtn.addEventListener('click', () => {
+            const text = wallInput.value.toUpperCase().replace(/[^A-Z]/g, '');
+            if (!text) return;
+
+            sendBtn.disabled = true;
+            let index = 0;
+
+            const interval = setInterval(() => {
+                if (index < text.length) {
+                    triggerBulb(text[index]);
+                    index++;
+                } else {
+                    clearInterval(interval);
+                    sendBtn.disabled = false;
+                }
+            }, 800);
+        });
+
+        // 5. CASSETTE SYNTH PLAYER (WEB AUDIO API SYNTHESIZER)
+        let audioCtx = null;
+        let isPlayingSynth = false;
+        let synthInterval = null;
+        let currentTrackIndex = 0;
+
+        const tracks = [
+            "Track 01: Hawkins Theme (Arpeggio Synth)",
+            "Track 02: Upside Down Ambience (Deep Lows)",
+            "Track 03: Run Joyce Run (Fast Pulse)"
+        ];
+
+        const playAudioBtn = document.getElementById('playAudioBtn');
+        const stopAudioBtn = document.getElementById('stopAudioBtn');
+        const nextTrackBtn = document.getElementById('nextTrackBtn');
+        const leftReel = document.getElementById('leftReel');
+        const rightReel = document.getElementById('rightReel');
+        const cassetteStatus = document.getElementById('cassetteStatus');
+        const currentTrackTitle = document.getElementById('currentTrackTitle');
+
+        function initSynth() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+            }
+        }
+
+        function playNote(freq, type = 'sawtooth', duration = 0.3) {
+            if (!audioCtx) return;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+
+            osc.type = type;
+            osc.frequency.setValueAtTime(freq, audioCtx.currentTime);
+
+            gain.gain.setValueAtTime(0.15, audioCtx.currentTime);
+            gain.gain.exponentialRampToValueAtTime(0.001, audioCtx.currentTime + duration);
+
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            osc.start();
+            osc.stop(audioCtx.currentTime + duration);
+        }
+
+        // Classic Stranger Things Arpeggio Frequencies (C E G B C B G E)
+        const notesTrack1 = [130.81, 164.81, 196.00, 246.94, 261.63, 246.94, 196.00, 164.81]; 
+        const notesTrack2 = [65.41, 82.41, 98.00, 123.47];
+        const notesTrack3 = [220.00, 261.63, 329.63, 392.00, 440.00];
+
+        function startSynthLoop() {
+            initSynth();
+            if (isPlayingSynth) return;
+            isPlayingSynth = true;
+
+            leftReel.classList.add('spinning');
+            rightReel.classList.add('spinning');
+            cassetteStatus.textContent = "REPRODUCIENDO ▶";
+            cassetteStatus.classList.add('text-st-neonBlue');
+
+            let noteIdx = 0;
+            synthInterval = setInterval(() => {
+                let noteList = notesTrack1;
+                if (currentTrackIndex === 1) noteList = notesTrack2;
+                if (currentTrackIndex === 2) noteList = notesTrack3;
+
+                playNote(noteList[noteIdx % noteList.length], currentTrackIndex === 1 ? 'sine' : 'sawtooth', 0.4);
+                noteIdx++;
+            }, currentTrackIndex === 2 ? 180 : 260);
+        }
+
+        function stopSynthLoop() {
+            isPlayingSynth = false;
+            clearInterval(synthInterval);
+            leftReel.classList.remove('spinning');
+            rightReel.classList.remove('spinning');
+            cassetteStatus.textContent = "PAUSADO";
+            cassetteStatus.classList.remove('text-st-neonBlue');
+        }
+
+        playAudioBtn.addEventListener('click', startSynthLoop);
+        stopAudioBtn.addEventListener('click', stopSynthLoop);
+
+        nextTrackBtn.addEventListener('click', () => {
+            currentTrackIndex = (currentTrackIndex + 1) % tracks.length;
+            currentTrackTitle.textContent = tracks[currentTrackIndex];
+            if (isPlayingSynth) {
+                stopSynthLoop();
+                startSynthLoop();
+            }
+        });
+
+        // 6. QUIZ LOGIC
+        const quizQuestions = [
+            {
+                q: "1. ¿Qué harías si se corta la luz en tu casa repentinamente?",
+                options: [
+                    { text: "Busco una linterna y salgo a investigar ruidos sospechosos.", char: "Mike" },
+                    { text: "Uso la mente para volver a encender las luces.", char: "Eleven" },
+                    { text: "Pongo música ochentera en mis auriculares.", char: "Max" },
+                    { text: "Preparo mi bate de béisbol y protejo a los demás.", char: "Steve" }
+                ]
+            },
+            {
+                q: "2. ¿Cuál es tu herramienta de supervivencia favorita?",
+                options: [
+                    { text: "Una super radio walkie-talkie de largo alcance.", char: "Dustin" },
+                    { text: "Poderes telequinéticos.", char: "Eleven" },
+                    { text: "Un bate con clavos.", char: "Steve" },
+                    { text: "Una linterna militar y mi placa de policía.", char: "Hopper" }
+                ]
+            },
+            {
+                q: "3. ¿Cuál es tu snack preferido durante una aventura?",
+                options: [
+                    { text: "Waffles (Eggos).", char: "Eleven" },
+                    { text: "Caramelos y chocolatinas de máquina.", char: "Dustin" },
+                    { text: "Café bien cargado por la mañana.", char: "Hopper" },
+                    { text: "Una pizza de Surfer Boy Pizza.", char: "Mike" }
+                ]
+            }
+        ];
+
+        let currentQIndex = 0;
+        let quizScores = { Eleven: 0, Mike: 0, Dustin: 0, Steve: 0, Hopper: 0, Max: 0 };
+
+        function renderQuizQuestion() {
+            const container = document.getElementById('quizContent');
+            const progress = document.getElementById('quizProgressBar');
+            progress.style.width = `${((currentQIndex + 1) / quizQuestions.length) * 100}%`;
+
+            if (currentQIndex >= quizQuestions.length) {
+                // Determine winner
+                const winner = Object.keys(quizScores).reduce((a, b) => quizScores[a] > quizScores[b] ? a : b);
+                container.innerHTML = `
+                    <div class="text-center py-6 space-y-4">
+                        <div class="w-20 h-20 bg-st-red/20 text-st-red rounded-full flex items-center justify-center text-4xl mx-auto border border-st-red/40">
+                            👑
+                        </div>
+                        <span class="text-xs font-mono text-st-neonBlue uppercase tracking-widest">Resultado del Test</span>
+                        <h3 class="font-serif text-3xl font-bold text-white">¡Eres ${winner}!</h3>
+                        <p class="text-gray-400 text-sm max-w-md mx-auto leading-relaxed">
+                            Tus decisiones encajan perfectamente con la personalidad y valentía de ${winner} en la lucha contra el Upside Down.
+                        </p>
+                        <button onclick="resetQuiz()" class="bg-st-red hover:bg-red-700 text-white font-mono font-bold px-6 py-3 rounded-xl shadow-lg transition-all mt-4">
+                            Repetir Test 🔄
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            const q = quizQuestions[currentQIndex];
+            container.innerHTML = `
+                <h3 class="font-serif text-2xl font-bold text-white mb-6">${q.q}</h3>
+                <div class="space-y-3">
+                    ${q.options.map((opt, i) => `
+                        <button onclick="answerQuiz('${opt.char}')" class="w-full text-left p-4 rounded-xl bg-gray-900 border border-gray-800 hover:border-st-red hover:bg-red-950/20 text-gray-300 hover:text-white transition-all font-mono text-sm flex items-center justify-between group">
+                            <span>${opt.text}</span>
+                            <i class="fa-solid fa-chevron-right text-gray-600 group-hover:text-st-red"></i>
+                        </button>
+                    `).join('')}
+                </div>
+            `;
+        }
+
+        function answerQuiz(char) {
+            quizScores[char] = (quizScores[char] || 0) + 1;
+            currentQIndex++;
+            renderQuizQuestion();
+        }
+
+        function resetQuiz() {
+            currentQIndex = 0;
+            quizScores = { Eleven: 0, Mike: 0, Dustin: 0, Steve: 0, Hopper: 0, Max: 0 };
+            renderQuizQuestion();
+        }
+
+        renderQuizQuestion();
+
+        // MOBILE MENU TOGGLE
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        mobileMenuBtn.addEventListener('click', () => {
+            mobileMenu.classList.toggle('hidden');
+        });
+        document.querySelectorAll('.mobile-link').forEach(l => {
+            l.addEventListener('click', () => mobileMenu.classList.add('hidden'));
+        });
+    </script>
+</body>
+</html>
